@@ -4,8 +4,8 @@
 ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Language](https://img.shields.io/badge/language-C++-blue)
-![Build](https://github.com/iBelow/hd2_sound/workflows/Build%20and%20Release/badge.svg)
-![Release](https://img.shields.io/github/v/release/iBelow/hd2_sound)
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
+![Downloads](https://img.shields.io/badge/downloads-releases-blue)
 
 ![Microphone Volume Control Service](assets/img_1.png)
 
@@ -188,3 +188,60 @@ MicrophoneVolumeService.exe -test -t 1 -m "Realtek"
 - Uses only standard Windows APIs
 - No network access required
 - Log contains only audio device operation information
+
+## 🤖 GitHub Actions & Automated Releases
+
+This project uses GitHub Actions for automated building and releasing:
+
+- **Automatic builds** on every commit
+- **Automated releases** when creating version tags
+- **Professional release packages** with documentation
+
+📖 **For developers**: See [.github/GITHUB_ACTIONS.md](.github/GITHUB_ACTIONS.md) for detailed CI/CD setup information.
+
+🚀 **To create a release**: See [RELEASE_GUIDE.md](RELEASE_GUIDE.md) for step-by-step instructions.
+
+## 🧪 Testing
+
+This project includes comprehensive tests to ensure reliability and maintainability:
+
+### Running Tests
+
+```cmd
+# Build and run all tests
+run_tests.bat
+
+# Or manually run tests after building
+tests\x64\Release\SimpleTests\SimpleTests.exe
+```
+
+### Test Coverage
+
+The test suite includes:
+
+- **Command Line Parsing Tests**: Validate argument parsing and default values
+- **Logging System Tests**: Test file logging, error handling, and log formatting
+- **Volume Control Tests**: Test volume state tracking and change detection
+- **Service Utility Tests**: Test service installation/management functions
+- **Helper Function Tests**: Test file operations and utility functions
+
+### Test Framework
+
+Tests use a custom lightweight testing framework that provides:
+- Simple assertion macros (`EXPECT_TRUE`, `EXPECT_EQ`, etc.)
+- Automatic test discovery and execution
+- Clear test result reporting
+- No external dependencies (Google Test optional)
+
+### For Developers
+
+```cmd
+# Build tests only
+msbuild tests\SimpleTests.vcxproj /p:Configuration=Release /p:Platform=x64
+
+# Add new tests by following the existing pattern:
+TEST_FUNCTION(MyNewTest) {
+    // Your test code here
+    EXPECT_TRUE(someCondition);
+}
+```

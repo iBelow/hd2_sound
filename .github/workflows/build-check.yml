@@ -43,6 +43,28 @@ jobs:
     - name: Build solution
       run: msbuild MicrophoneVolumeService.sln /p:Configuration=${{ env.BUILD_CONFIGURATION }} /p:Platform=${{ env.BUILD_PLATFORM }} /p:PlatformToolset=v143
       
+    - name: Build tests
+      run: msbuild tests\SimpleTests.vcxproj /p:Configuration=${{ env.BUILD_CONFIGURATION }} /p:Platform=${{ env.BUILD_PLATFORM }} /p:PlatformToolset=v143
+      continue-on-error: false
+      
+    - name: Run tests
+      run: |
+        Write-Host "🧪 Running tests..."
+        $testExe = "tests\x64\Release\SimpleTests\SimpleTests.exe"
+        if (Test-Path $testExe) {
+          $testResult = & $testExe
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host "✅ All tests passed!"
+          } else {
+            Write-Error "❌ Some tests failed!"
+            exit 1
+          }
+        } else {
+          Write-Error "❌ Test executable not found: $testExe"
+          exit 1
+        }
+      shell: pwsh
+      
     - name: Test build result
       run: |
         if (Test-Path "x64\Release\MicrophoneVolumeService.exe") {

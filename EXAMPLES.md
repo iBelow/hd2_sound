@@ -342,3 +342,80 @@ powershell "Get-WmiObject -Class Win32_SoundDevice | Select Name, Status"
 - Check log file availability
 - Ensure microphone name is correct
 - Verify microphone is active and not used by another application
+
+## 🧪 Testing Examples
+
+### Running Tests
+
+```cmd
+# Build and run all tests
+run_tests.bat
+
+# Quick test for specific categories
+quick_test.bat cmdline
+quick_test.bat logging
+quick_test.bat volume
+```
+
+### Manual Test Execution
+
+```cmd
+# Build tests manually
+"C:\Program Files\Microsoft Visual Studio\2022\Community\Msbuild\Current\Bin\amd64\MSBuild.exe" tests\SimpleTests.vcxproj /p:Configuration=Release /p:Platform=x64
+
+# Run tests manually
+tests\x64\Release\SimpleTests\SimpleTests.exe
+```
+
+### Test Output Example
+
+```
+========================================
+Microphone Volume Service Tests
+========================================
+Running: CommandLine_ParseInterval_ValidValue... PASSED
+Running: CommandLine_ParseInterval_ZeroValue_UsesDefault... PASSED
+Running: CommandLine_ParseMicrophoneFilter... PASSED
+Running: CommandLine_ParseEventLogFlag... PASSED
+Running: Logging_WriteLog_CreatesFile... PASSED
+Running: Logging_WriteLog_ContainsMessage... PASSED
+Running: Logging_WriteErrorLog_ContainsErrorPrefix... PASSED
+Running: Volume_LastVolumeState_Tracking... PASSED
+Running: Volume_VolumeChangeDetection... PASSED
+Running: TestHelpers_FileOperations... PASSED
+
+===============================================
+Test Summary:
+  Total tests: 10
+  Passed: 10
+  Failed: 0
+===============================================
+ALL TESTS PASSED!
+```
+
+### Adding New Tests
+
+Create new test functions in `tests\SimpleTests.cpp`:
+
+```cpp
+TEST_FUNCTION(MyNewTest) {
+    // Setup
+    std::wstring testValue = L"test";
+    
+    // Execute
+    bool result = SomeFunction(testValue);
+    
+    // Verify
+    EXPECT_TRUE(result);
+    EXPECT_EQ(testValue, L"test");
+}
+```
+
+### Test Categories
+
+- **CommandLine_**: Command line argument parsing tests
+- **Logging_**: Logging system functionality tests  
+- **Volume_**: Volume control and state tracking tests
+- **TestHelpers_**: Utility and helper function tests
+
+For detailed testing information, see [TESTING.md](TESTING.md).
