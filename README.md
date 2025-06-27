@@ -36,10 +36,12 @@ If you don't want to build from source, you can download a ready-to-use version:
    ```cmd
    MicrophoneVolumeService.exe -install
    ```
-3. **Start**: The service will start automatically, or start manually:
+3. **Verify**: The service starts automatically. To check status:
    ```cmd
-   net start "MicrophoneVolumeService"
+   sc query MicrophoneVolumeService
    ```
+
+For troubleshooting, check logs at: `C:\Windows\Temp\MicrophoneVolumeService.log`
 
 **Note**: Administrator privileges are required for service installation and management.
 
@@ -68,6 +70,18 @@ MicrophoneVolumeService.exe -install -t 5
 
 # Install with specific microphone filter
 MicrophoneVolumeService.exe -install -t 3 -m "USB Microphone"
+
+# Use Windows Event Log instead of file logging
+MicrophoneVolumeService.exe -install -t 2 -eventlog
+```
+
+⚠️ **Note**: Service is configured for auto-start and starts immediately after installation.
+
+### Service Status Check
+
+```cmd
+# Check if service is running and properly configured
+check_service.bat
 ```
 
 ### Service Uninstallation

@@ -45,6 +45,15 @@ MicrophoneVolumeService.exe -install -t 2 -m "Blue Yeti"
 
 # For laptop built-in microphone
 MicrophoneVolumeService.exe -install -t 1 -m "Realtek"
+
+# Use Windows Event Log (recommended - auto cleanup)
+MicrophoneVolumeService.exe -install -t 2 -eventlog
+
+# Use custom log file location
+MicrophoneVolumeService.exe -install -t 2 -logfile "C:\MyLogs\microphone.log"
+
+# Full example with all options
+MicrophoneVolumeService.exe -install -t 3 -m "Blue Yeti" -eventlog
 ```
 
 ### Testing with Different Settings
@@ -58,6 +67,12 @@ MicrophoneVolumeService.exe -test -t 2 -m "Microphone Array"
 
 # Search microphones by partial name
 MicrophoneVolumeService.exe -test -t 3 -m "Audio"
+
+# Test with Event Log (check Event Viewer for results)
+MicrophoneVolumeService.exe -test -t 2 -eventlog
+
+# Test with custom log file
+MicrophoneVolumeService.exe -test -t 2 -logfile "C:\temp\test.log"
 ```
 
 ## Service Management
@@ -119,55 +134,144 @@ To determine the exact name of your microphone:
 
 ### Gaming Setup
 ```cmd
-# Fast correction for gaming microphone
-MicrophoneVolumeService.exe -install -t 1 -m "Gaming"
+# Fast correction for gaming microphone with Event Log
+MicrophoneVolumeService.exe -install -t 1 -m "Gaming" -eventlog
 ```
 
 ### Office Work
 ```cmd
 # Moderate frequency for built-in microphone
-MicrophoneVolumeService.exe -install -t 5 -m "Internal"
+MicrophoneVolumeService.exe -install -t 5 -m "Internal" -eventlog
 ```
 
 ### Streaming/Recording
 ```cmd
 # Frequent check for professional microphone
-MicrophoneVolumeService.exe -install -t 2 -m "Blue Yeti"
+MicrophoneVolumeService.exe -install -t 2 -m "Blue Yeti" -eventlog
 ```
 
 ### Multiple Microphones
 ```cmd
-# For all USB microphones
-MicrophoneVolumeService.exe -install -t 3 -m "USB"
+# For all USB microphones with custom log
+MicrophoneVolumeService.exe -install -t 3 -m "USB" -logfile "C:\Logs\usb_mics.log"
 
-# For all microphones (no filter)
-MicrophoneVolumeService.exe -install -t 2
+# For all microphones (no filter) with Event Log
+MicrophoneVolumeService.exe -install -t 2 -eventlog
 ```
 
 ## Monitoring and Debugging
 
-### View Log
+### View File Logs
 ```cmd
-# Real-time
+# Real-time (if using file logging)
 powershell Get-Content "C:\Windows\Temp\MicrophoneVolumeService.log" -Wait
 
 # Latest entries
 powershell Get-Content "C:\Windows\Temp\MicrophoneVolumeService.log" -Tail 20
 ```
 
-### Check Windows Events
+### View Windows Event Log
 ```cmd
 # Open Event Viewer
 eventvwr.msc
 
-# Or via PowerShell
+# Or via PowerShell (if using -eventlog option)
 powershell Get-EventLog -LogName Application -Source "MicrophoneVolumeService" -Newest 10
+
+# Filter only errors
+powershell Get-EventLog -LogName Application -Source "MicrophoneVolumeService" -EntryType Error -Newest 5
+```
+
+### Log Behavior
+- **File Logging**: Creates logs in specified file (default: C:\Windows\Temp\MicrophoneVolumeService.log)
+- **Event Log**: Uses Windows Event Log with automatic rotation and cleanup
+- **Smart Logging**: Only logs when microphone volume actually changes (not every interval)
+- **Log Levels**: Information, Warning, Error events with proper categorization
+
+## Logging Options and Recommendations
+
+### Why the Logging was Improved
+The original version logged "Volume set to 100%" every 2 seconds, which created massive log files. The new version only logs when:
+- A new microphone is detected
+- The microphone volume actually changes  
+- There's an error or warning
+
+### File vs Event Log
+
+#### File Logging (Default)
+```cmd
+# Default location
+MicrophoneVolumeService.exe -install -t 2
+
+# Custom location  
+MicrophoneVolumeService.exe -install -t 2 -logfile "D:\MyLogs\microphone.log"
+```
+
+**Pros:**
+- Easy to access and read
+- Can specify custom location
+- Simple text format
+
+**Cons:**
+- Manual cleanup required
+- Can grow large over time
+- No automatic rotation
+
+#### Windows Event Log (Recommended)
+```cmd
+# Use Event Log instead of file
+MicrophoneVolumeService.exe -install -t 2 -eventlog
+```
+
+**Pros:**
+- Automatic log rotation and cleanup by Windows
+- Integrated with Windows logging system
+- Better for production environments
+- Can set retention policies
+- Categorized by event type (Info/Warning/Error)
+
+**Cons:**
+- Requires Event Viewer to read easily
+- Mixed with other system events
+
+### Log Size Comparison
+
+**Before (old version):**
+- ~50 KB per hour (logging every 2 seconds)
+- ~1.2 MB per day
+- ~36 MB per month
+
+**After (new version):**
+- ~1-5 KB per day (only on actual changes)
+- Typical: 10-20 log entries per day instead of 43,200
+- **99% reduction in log volume**
+
+### Recommended Settings
+
+```cmd
+# For personal gaming setup
+MicrophoneVolumeService.exe -install -t 2 -eventlog
+
+# For development/debugging
+MicrophoneVolumeService.exe -install -t 1 -logfile "C:\debug\mic.log"
+
+# For production servers
+MicrophoneVolumeService.exe -install -t 5 -eventlog
 ```
 
 ## Automation
 
 ### Startup After Windows Installation
-Service is automatically configured for autostart after installation.
+- Service is automatically configured for autostart on Windows boot
+- Service starts immediately after installation (if installation succeeds)
+- If service fails to start during installation, start manually:
+  ```cmd
+  # Via command line
+  net start MicrophoneVolumeService
+  
+  # Via Services manager
+  services.msc
+  ```
 
 ### Deployment Script
 ```cmd
@@ -189,11 +293,40 @@ echo Deployment completed!
 
 ### Service Won't Start
 ```cmd
+# Check service status
+sc query MicrophoneVolumeService
+
+# Check service configuration
+sc qc MicrophoneVolumeService
+
 # Check access rights
 icacls "x64\Release\MicrophoneVolumeService.exe"
 
 # Check dependencies
 dumpbin /dependents "x64\Release\MicrophoneVolumeService.exe"
+
+# Manual start
+net start MicrophoneVolumeService
+
+# Check last Windows error
+net helpmsg [error_code]
+```
+
+### Service Doesn't Auto-Start After Reboot
+```cmd
+# Verify auto-start configuration
+sc qc MicrophoneVolumeService
+
+# Should show: START_TYPE: 2 AUTO_START
+# If not, fix with:
+sc config MicrophoneVolumeService start= auto
+
+# Check if service is delayed start
+sc qc MicrophoneVolumeService
+# Look for DELAYED_AUTO_START_INFO
+
+# Remove delayed start if present
+sc config MicrophoneVolumeService start= auto
 ```
 
 ### Microphone Not Found
