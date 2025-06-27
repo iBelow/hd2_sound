@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 Documentation
+    url: https://github.com/iBelow/hd2_sound/blob/main/README.md
+    about: Read the documentation for setup and usage instructions
+  - name: 💬 Discussions  
+    url: https://github.com/iBelow/hd2_sound/discussions
+    about: Ask questions and discuss with the community
+  - name: 🔍 Troubleshooting Guide
+    url: https://github.com/iBelow/hd2_sound/blob/main/EXAMPLES.md
+    about: Common issues and solutions

@@ -1,0 +1,41 @@
+name: ❓ Question or Support
+description: Ask a question about using the Microphone Volume Service
+title: "[QUESTION] "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for your question! Please search existing issues first to see if your question has already been answered.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: What's your question?
+      description: Please describe what you're trying to do or what you need help with.
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Provide any relevant context about your setup or what you've already tried.
+      placeholder: |
+        - Service version:
+        - Windows version:
+        - What you've tried:
+        - Any error messages:
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission checklist
+      description: Please confirm you've done the following
+      options:
+        - label: I have read the README.md documentation
+          required: true
+        - label: I have checked existing issues and discussions
+          required: true
+        - label: I have checked the troubleshooting section in EXAMPLES.md
+          required: false
