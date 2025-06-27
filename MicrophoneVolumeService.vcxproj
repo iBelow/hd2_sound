@@ -153,6 +153,18 @@
   <ItemGroup>
     <ClCompile Include="MicrophoneVolumeService.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="MicrophoneVolumeService.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="version.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\icon.ico" />
+    <None Include="assets\icon.svg" />
+    <None Include="create_icon.ps1" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

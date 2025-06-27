@@ -32,5 +32,15 @@ if %ERRORLEVEL% neq 0 (
 echo.
 echo Build completed successfully!
 echo Executable file: x64\Release\MicrophoneVolumeService.exe
+
+REM Show version and size information
+if exist "x64\Release\MicrophoneVolumeService.exe" (
+    echo.
+    echo File information:
+    "x64\Release\MicrophoneVolumeService.exe" -version
+    echo.
+    for %%i in ("x64\Release\MicrophoneVolumeService.exe") do echo File size: %%~zi bytes
+    echo Icon: Included from assets\icon.ico
+)
 echo.
 pause
