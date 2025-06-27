@@ -15,6 +15,7 @@ Release/
 
 # Visual Studio temporary files
 .vs/
+.vscode/
 *.user
 *.suo
 *.sdf
@@ -24,6 +25,10 @@ Release/
 *.sln.docstates
 *.tmp
 *.temp
+
+# Build results and intermediate folders
+Micropho.*/
+*.8B54F7F5/
 
 # Build results
 [Dd]ebug/
@@ -289,6 +294,10 @@ FodyWeavers.xsd
 
 # Service log files
 *.log
+
+# Keep assets folder
+!assets/
+!assets/*
 
 # Windows thumbnail cache files
 Thumbs.db

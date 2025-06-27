@@ -9,6 +9,7 @@
 #include <thread>
 #include <chrono>
 #include <comdef.h>
+#include "version.h"
 
 #pragma comment(lib, "ole32.lib")
 #pragma comment(lib, "user32.lib")
@@ -378,18 +379,30 @@ int wmain(int argc, wchar_t* argv[]) {
                 std::this_thread::sleep_for(std::chrono::seconds(g_IntervalSeconds));
             }
             return 0;
+        } else if (wcscmp(argv[1], L"-version") == 0 || wcscmp(argv[1], L"--version") == 0) {
+            // Show version
+            std::wcout << L"Microphone Volume Control Service" << std::endl;
+            std::wcout << L"Version: " << VERSION_STRING << std::endl;
+            std::wcout << L"Built for: Windows x64" << std::endl;
+            std::wcout << L"Purpose: Fix Helldivers 2 microphone volume bug" << std::endl;
+            return 0;
         }
     }
 
     // Show help
+    std::wcout << L"Microphone Volume Control Service v" << VERSION_STRING_SHORT << std::endl;
+    std::wcout << L"Created to fix Helldivers 2 microphone volume bug" << std::endl;
+    std::wcout << L"" << std::endl;
     std::wcout << L"Usage:" << std::endl;
     std::wcout << L"  " << argv[0] << L" -install [-t seconds] [-m \"microphone_name\"]" << std::endl;
     std::wcout << L"  " << argv[0] << L" -uninstall" << std::endl;
     std::wcout << L"  " << argv[0] << L" -test [-t seconds] [-m \"microphone_name\"]" << std::endl;
+    std::wcout << L"  " << argv[0] << L" -version" << std::endl;
     std::wcout << L"" << std::endl;
     std::wcout << L"Parameters:" << std::endl;
     std::wcout << L"  -t seconds     Check interval (default 2)" << std::endl;
     std::wcout << L"  -m name        Microphone name filter (default all)" << std::endl;
+    std::wcout << L"  -version       Show version information" << std::endl;
     std::wcout << L"" << std::endl;
     std::wcout << L"Examples:" << std::endl;
     std::wcout << L"  " << argv[0] << L" -install -t 5 -m \"USB Microphone\"" << std::endl;

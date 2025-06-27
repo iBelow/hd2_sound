@@ -1,5 +1,12 @@
 # Microphone Volume Control Service
 
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Language](https://img.shields.io/badge/language-C++-blue)
+
+![Microphone Volume Control Service](assets/img_1.png)
+
 Windows service for automatic microphone volume management.
 
 ## What is this software for?
@@ -20,6 +27,22 @@ This service automatically sets the microphone volume level to 100% at specified
 - Operation logging
 - Runs as Windows system service
 
+## Quick Start (Pre-built Release)
+
+If you don't want to build from source, you can download a ready-to-use version:
+
+1. **Download**: Go to [Releases](../../releases) and download the latest `MicrophoneVolumeService.exe`
+2. **Install**: Run as administrator:
+   ```cmd
+   MicrophoneVolumeService.exe -install
+   ```
+3. **Start**: The service will start automatically, or start manually:
+   ```cmd
+   net start "MicrophoneVolumeService"
+   ```
+
+**Note**: Administrator privileges are required for service installation and management.
+
 ## Build
 
 1. Open `MicrophoneVolumeService.sln` in Visual Studio 2019/2022
@@ -27,6 +50,7 @@ This service automatically sets the microphone volume level to 100% at specified
 3. Build the project (Build -> Build Solution)
 
 Or use MSBuild from command line:
+
 ```cmd
 msbuild MicrophoneVolumeService.sln /p:Configuration=Release /p:Platform=x64
 ```
@@ -70,17 +94,19 @@ MicrophoneVolumeService.exe -test -t 2 -m "Realtek"
 After installation, the service can be managed through:
 
 1. **Windows Services Manager (services.msc)**:
+
    - Find "Microphone Volume Control Service"
    - Use Start/Stop/Restart buttons
 
 2. **Command Line**:
+
    ```cmd
    # Start service
    net start "MicrophoneVolumeService"
-   
+
    # Stop service
    net stop "MicrophoneVolumeService"
-   
+
    # Or via sc
    sc start MicrophoneVolumeService
    sc stop MicrophoneVolumeService
@@ -91,17 +117,20 @@ After installation, the service can be managed through:
 - `-install` - Install service
 - `-uninstall` - Uninstall service
 - `-test` - Run in test mode (without service installation)
+- `-version` - Show version information
 - `-t <seconds>` - Check interval in seconds (default 2)
 - `-m "<name>"` - Microphone name filter (default all microphones)
 
 ## Operation Log
 
 The service maintains an operation log in the file:
+
 ```
 C:\Windows\Temp\MicrophoneVolumeService.log
 ```
 
 The log records:
+
 - Service start and stop events
 - Successful volume setting operations
 - Audio device errors
