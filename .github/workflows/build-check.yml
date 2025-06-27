@@ -1,0 +1,68 @@
+name: Build Check
+
+on:
+  push:
+    branches: [ main, master ]
+    paths-ignore:
+      - '**.md'
+      - 'assets/**'
+  pull_request:
+    branches: [ main, master ]
+    paths-ignore:
+      - '**.md'  
+      - 'assets/**'
+
+env:
+  BUILD_CONFIGURATION: Release
+  BUILD_PLATFORM: x64
+
+jobs:
+  build-check:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+      
+    - name: Setup Windows SDK
+      uses: GuillaumeFalourd/setup-windows10-sdk-action@v1.11
+      with:
+        sdk-version: 20348
+        
+    - name: Restore NuGet packages (if any)
+      run: |
+        if (Test-Path "*.sln") {
+          nuget restore MicrophoneVolumeService.sln
+        }
+      shell: pwsh
+      continue-on-error: true
+      
+    - name: Build solution
+      run: msbuild MicrophoneVolumeService.sln /p:Configuration=${{ env.BUILD_CONFIGURATION }} /p:Platform=${{ env.BUILD_PLATFORM }} /p:PlatformToolset=v143
+      
+    - name: Test build result
+      run: |
+        if (Test-Path "x64\Release\MicrophoneVolumeService.exe") {
+          Write-Host "✅ Build successful!"
+          $fileInfo = Get-Item "x64\Release\MicrophoneVolumeService.exe"
+          Write-Host "📦 File size: $([math]::Round($fileInfo.Length / 1KB, 1)) KB"
+          Write-Host "📅 Build time: $($fileInfo.LastWriteTime)"
+          
+          # Test version output
+          Write-Host "🔍 Testing version output:"
+          & "x64\Release\MicrophoneVolumeService.exe" -version
+        } else {
+          Write-Error "❌ Build failed - executable not found"
+          exit 1
+        }
+      shell: pwsh
+      
+    - name: Upload artifact for testing
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-test-${{ github.sha }}
+        path: x64/Release/MicrophoneVolumeService.exe
+        retention-days: 7

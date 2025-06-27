@@ -4,6 +4,8 @@
 ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Language](https://img.shields.io/badge/language-C++-blue)
+![Build](https://github.com/[username]/[repo]/workflows/Build%20and%20Release/badge.svg)
+![Release](https://img.shields.io/github/v/release/[username]/[repo])
 
 ![Microphone Volume Control Service](assets/img_1.png)
 
@@ -31,8 +33,11 @@ This service automatically sets the microphone volume level to 100% at specified
 
 If you don't want to build from source, you can download a ready-to-use version:
 
-1. **Download**: Go to [Releases](../../releases) and download the latest `MicrophoneVolumeService.exe`
-2. **Install**: Run as administrator:
+1. **Download**: Go to [Releases](../../releases) and download the latest release package
+   - `MicrophoneVolumeService-vX.X.X-x64.zip` (complete package with docs)
+   - OR `MicrophoneVolumeService.exe` (standalone executable)
+
+2. **Install**: Extract and run as administrator:
    ```cmd
    MicrophoneVolumeService.exe -install
    ```
@@ -40,6 +45,8 @@ If you don't want to build from source, you can download a ready-to-use version:
    ```cmd
    sc query MicrophoneVolumeService
    ```
+
+🤖 **Auto-built releases**: Every version is automatically built and tested using GitHub Actions.
 
 For troubleshooting, check logs at: `C:\Windows\Temp\MicrophoneVolumeService.log`
 

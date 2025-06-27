@@ -1,0 +1,240 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ main, master ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main, master ]
+
+env:
+  BUILD_CONFIGURATION: Release
+  BUILD_PLATFORM: x64
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+      
+    - name: Setup Windows SDK
+      uses: GuillaumeFalourd/setup-windows10-sdk-action@v1.11
+      with:
+        sdk-version: 20348
+        
+    - name: Restore NuGet packages
+      run: nuget restore MicrophoneVolumeService.sln
+      
+    - name: Build solution
+      run: msbuild MicrophoneVolumeService.sln /p:Configuration=${{ env.BUILD_CONFIGURATION }} /p:Platform=${{ env.BUILD_PLATFORM }} /p:PlatformToolset=v143
+      
+    - name: Test executable
+      run: |
+        if (Test-Path "x64\Release\MicrophoneVolumeService.exe") {
+          Write-Host "✅ Executable built successfully"
+          & "x64\Release\MicrophoneVolumeService.exe" -version
+        } else {
+          Write-Error "❌ Executable not found"
+          exit 1
+        }
+      shell: pwsh
+      
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: MicrophoneVolumeService-${{ env.BUILD_PLATFORM }}-${{ env.BUILD_CONFIGURATION }}
+        path: |
+          x64/Release/MicrophoneVolumeService.exe
+          x64/Release/MicrophoneVolumeService.pdb
+          README.md
+          EXAMPLES.md
+          *.bat
+        retention-days: 30
+
+  release:
+    needs: build
+    runs-on: windows-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+      
+    - name: Setup Windows SDK
+      uses: GuillaumeFalourd/setup-windows10-sdk-action@v1.11
+      with:
+        sdk-version: 20348
+        
+    - name: Restore NuGet packages
+      run: nuget restore MicrophoneVolumeService.sln
+      
+    - name: Build solution
+      run: msbuild MicrophoneVolumeService.sln /p:Configuration=${{ env.BUILD_CONFIGURATION }} /p:Platform=${{ env.BUILD_PLATFORM }} /p:PlatformToolset=v143
+      
+    - name: Get version from tag
+      id: get_version
+      run: |
+        $tag = "${{ github.ref_name }}"
+        $version = $tag -replace '^v', ''
+        echo "version=$version" >> $env:GITHUB_OUTPUT
+        echo "tag=$tag" >> $env:GITHUB_OUTPUT
+      shell: pwsh
+      
+    - name: Create release package
+      run: |
+        $version = "${{ steps.get_version.outputs.version }}"
+        $packageName = "MicrophoneVolumeService-v$version-x64"
+        
+        # Create release directory
+        New-Item -ItemType Directory -Force -Path "release"
+        New-Item -ItemType Directory -Force -Path "release\$packageName"
+        
+        # Copy files
+        Copy-Item "x64\Release\MicrophoneVolumeService.exe" "release\$packageName\"
+        Copy-Item "README.md" "release\$packageName\"
+        Copy-Item "EXAMPLES.md" "release\$packageName\"
+        Copy-Item "*.bat" "release\$packageName\" -ErrorAction SilentlyContinue
+        
+        # Create version info file
+        @"
+        Microphone Volume Control Service v$version
+        
+        Built: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')
+        Commit: ${{ github.sha }}
+        Platform: Windows x64
+        Configuration: Release
+        
+        Purpose: Fix Helldivers 2 microphone volume bug
+        
+        Files included:
+        - MicrophoneVolumeService.exe (main executable)
+        - README.md (documentation)
+        - EXAMPLES.md (usage examples)
+        - *.bat (helper scripts)
+        
+        Installation:
+        1. Run as administrator: MicrophoneVolumeService.exe -install
+        2. Service will start automatically
+        3. Check logs: C:\Windows\Temp\MicrophoneVolumeService.log
+        
+        For more information, see README.md
+        "@ | Out-File -FilePath "release\$packageName\VERSION.txt" -Encoding UTF8
+        
+        # Create ZIP
+        Compress-Archive -Path "release\$packageName\*" -DestinationPath "release\$packageName.zip"
+        
+        echo "package_name=$packageName" >> $env:GITHUB_OUTPUT
+        echo "package_path=release\$packageName.zip" >> $env:GITHUB_OUTPUT
+      shell: pwsh
+      id: package
+      
+    - name: Generate release notes
+      id: release_notes
+      run: |
+        $version = "${{ steps.get_version.outputs.version }}"
+        $notes = @"
+        # Microphone Volume Control Service v$version
+        
+        🎮 **Fixes Helldivers 2 microphone volume bug**
+        
+        ## 🚀 Quick Start
+        
+        1. **Download** ``MicrophoneVolumeService-v$version-x64.zip`` below
+        2. **Extract** and run as administrator:
+           ````cmd
+           MicrophoneVolumeService.exe -install
+           ````
+        3. **Done!** Service starts automatically and runs in background
+        
+        ## ✨ Features
+        
+        - ✅ Automatically keeps microphone volume at 100%
+        - ✅ Configurable check intervals
+        - ✅ Microphone filtering by name
+        - ✅ Smart logging (only logs when volume changes)
+        - ✅ Windows Event Log support
+        - ✅ Runs as Windows service
+        
+        ## 📋 What's New
+        
+        - Improved logging efficiency (99% less log spam)
+        - Windows Event Log support
+        - Better auto-start handling
+        - Enhanced troubleshooting tools
+        
+        ## 📁 Package Contents
+        
+        - ``MicrophoneVolumeService.exe`` - Main executable
+        - ``README.md`` - Full documentation  
+        - ``EXAMPLES.md`` - Usage examples
+        - ``*.bat`` - Helper scripts for easy management
+        - ``VERSION.txt`` - Build information
+        
+        ## 🔧 Usage Examples
+        
+        ````cmd
+        # Install with default settings (recommended)
+        MicrophoneVolumeService.exe -install
+        
+        # Install with faster checking for gaming
+        MicrophoneVolumeService.exe -install -t 1
+        
+        # Install for specific microphone only
+        MicrophoneVolumeService.exe -install -m "USB Microphone"
+        
+        # Use Windows Event Log instead of file
+        MicrophoneVolumeService.exe -install -eventlog
+        ````
+        
+        ## 🛠️ System Requirements
+        
+        - Windows 10/11 or Windows Server 2016+
+        - Administrator privileges for installation
+        - Active microphone device
+        
+        ## 📝 Logs & Troubleshooting
+        
+        - **Default log location**: ``C:\Windows\Temp\MicrophoneVolumeService.log``
+        - **Service management**: Use ``services.msc`` or command line
+        - **Check status**: ``sc query MicrophoneVolumeService``
+        
+        ## 🎯 Why This Service?
+        
+        Helldivers 2 has a bug where it automatically lowers your microphone volume, breaking voice chat in Discord and other apps. This service continuously monitors and fixes your microphone volume so you can focus on the game!
+        
+        ---
+        
+        💡 **Pro tip**: After installation, the service runs automatically in the background. No need to start it manually!
+        "@
+        
+        $notes | Out-File -FilePath "release_notes.md" -Encoding UTF8
+        
+        # Set multiline output
+        $delimiter = "EOF$((Get-Random))"
+        echo "notes<<$delimiter" >> $env:GITHUB_OUTPUT
+        Get-Content "release_notes.md" >> $env:GITHUB_OUTPUT
+        echo "$delimiter" >> $env:GITHUB_OUTPUT
+      shell: pwsh
+      
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.get_version.outputs.tag }}
+        name: "Microphone Volume Control Service v${{ steps.get_version.outputs.version }}"
+        body: ${{ steps.release_notes.outputs.notes }}
+        files: |
+          ${{ steps.package.outputs.package_path }}
+          x64/Release/MicrophoneVolumeService.exe
+        draft: false
+        prerelease: false
+        generate_release_notes: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
