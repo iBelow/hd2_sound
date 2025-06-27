@@ -4,8 +4,8 @@
 ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Language](https://img.shields.io/badge/language-C++-blue)
-![Build](https://github.com/[username]/[repo]/workflows/Build%20and%20Release/badge.svg)
-![Release](https://img.shields.io/github/v/release/[username]/[repo])
+![Build](https://github.com/iBelow/hd2_sound/workflows/Build%20and%20Release/badge.svg)
+![Release](https://img.shields.io/github/v/release/iBelow/hd2_sound)
 
 ![Microphone Volume Control Service](assets/img_1.png)
 
